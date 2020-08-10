@@ -8,13 +8,18 @@ using Random = UnityEngine.Random;
 public class Figure
     {
         public Vector2 Position => position;
+        public int Rotation => rotation;
+        
         
         private List<Cell> cells;
         private Vector2 position;
+        private int rotation;
 
         public Figure()
         {
             cells = new List<Cell>();
+            position = Vector2.zero;
+            rotation = 0;
         }
 
         public Figure Rotate(Direction direction)
@@ -29,6 +34,7 @@ public class Figure
 
         private void Rotate(int multiplier)
         {
+            rotation = (rotation+multiplier)%4;
             foreach (Cell cell in this.cells)
             {
                 cell.Position = RotateVector(cell.Position, 90 * multiplier);
@@ -100,7 +106,7 @@ public class Figure
                 case 0: return GenerateIFigure();
                 case 1: return GenerateTFigure();
                 case 2: return GenerateUFigure();
-                case 3: return GenerateZFigure();
+                case 3: return GenerateNFigure();
                 case 4: return GenerateИFigure();
                 case 5: return GenerateГFigure();
                 case 6: return GenerateLFigure();
@@ -125,7 +131,7 @@ public class Figure
             res.cells.Add(new Cell(Vector2.right));
             return res;
         }
-        public static Figure GenerateZFigure()
+        public static Figure GenerateNFigure()
         {
             Figure res = new Figure();
             res.cells.Add(new Cell(Vector2.zero));
@@ -186,6 +192,26 @@ public class Figure
             res.cells.Add(new Cell(Vector2.zero));
             return res;
         }
+
+        public static bool AreSame(List<Figure> l1, List<Figure> l2)
+        {
+            if (l1.Count != l2.Count) return false;
+            bool dpf = false;
+            Vector2 dp = Vector2.zero;
+            for (int i = 0; i < l1.Count; i++)
+            {
+                Figure f1 = l1[i];
+                Figure f2 = l2[i];
+                if (!dpf)
+                    dp = f1.Position - f2.Position;
+                if (f1.Position != f2.Position + dp)
+                    return false;
+                if (f1.Rotation != f2.Rotation)
+                    return false;
+            }
+            return true;
+        }
+
         
     }
 

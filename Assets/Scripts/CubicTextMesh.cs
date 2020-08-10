@@ -195,6 +195,20 @@ public class CubicTextMesh : MonoBehaviour
         {0,0,0},
         {0,1,1},
     };
+    private static int[,] lx = new int[,]
+    {
+        {0,0,0},
+        {1,0,1},
+        {0,1,0},
+        {1,0,1},
+    };
+    private static int[,] lp = new int[,]
+    {
+        {0,0,0},
+        {1,0,1},
+        {1,1,1},
+        {0,1,0},
+    };
     private static int[,] lC = new int[,]
     {
         
@@ -211,12 +225,14 @@ public class CubicTextMesh : MonoBehaviour
         
     };
 
-    
-
-    void Start()
+    private void Awake()
     {
         pool = new VoxelPool(voxel,this.transform);
         this.rotation = this.transform.rotation;
+    }
+
+    void Start()
+    {
         Text = text;
     }
 
@@ -286,6 +302,8 @@ public class CubicTextMesh : MonoBehaviour
             case '=': return BuildLetterFromArray(p,lequal,4,3); break;
             case 'u': return BuildLetterFromArray(p,lrr,4,3); break;
             case 'i': return BuildLetterFromArray(p,lrl,4,3); break;
+            case 'x': return BuildLetterFromArray(p,lx,4,3); break;
+            case 'p': return BuildLetterFromArray(p,lp,4,3); break;
             case 'C': return BuildLetterFromArray(p,lC,10,13); break;
             default: return BuildLetterFromArray(p,l,4,3); break;
         }

@@ -12,7 +12,8 @@ using Vector3 = UnityEngine.Vector3;
 
 public class GameFieldBehaviour : MonoBehaviour
 {
-
+    public delegate RESULT Request<RESULT>();
+    
     public int height;
     public int width;
     public GameObject cellPrefab;
@@ -25,11 +26,13 @@ public class GameFieldBehaviour : MonoBehaviour
     private bool isGameStarted;
     private CubicTextMesh gg;
     
-    public SpawnerBehaviour spawner;
     public ScoreBehaviour score;
     public LevelBehaviour level;
     public ComboBehaviour combo;
-    public UnityAction OnGameOver;
+    public Action OnGameOver;
+    public Request<Figure> OnFigureNeeed;
+    public Action<Figure> OnFigureFallen;
+    public Request<bool> OnLifeRequested;
 
     public enum Direction
     {
@@ -154,12 +157,6 @@ public class GameFieldBehaviour : MonoBehaviour
         PrepareForNewGame();
     }
 
-    private void UnityWTF()
-    {
-        Debug.Log("WTF");
-    }
-    
-
     private void Display()
     {
         for (int i = 0; i < height; i++)
@@ -218,13 +215,36 @@ public class GameFieldBehaviour : MonoBehaviour
 
     private void HandleFallenFigure()
     {
+        OnFigureFallen?.Invoke(current);
         Fill();
-        Clear();
-        Figure next = spawner.PopNext();
+        ClearLines();
+        Figure next = OnFigureNeeed?.Invoke();
         if (CheckIfPositionAllowed(next, next.Position))
             current = next;
         else
-            StartCoroutine("GameOver");
+            if(!SpendLife())
+                StartCoroutine("GameOver");
+    }
+
+    private bool SpendLife()
+    {
+        if (OnLifeRequested())
+        {
+            ClearField();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private void ClearField()
+    {
+        foreach (Cell c in cells)
+        {
+            c.IsFilled = false;
+        }
     }
     
     class CantFallException : Exception{};
@@ -252,7 +272,7 @@ public class GameFieldBehaviour : MonoBehaviour
         }
     }
 
-    private void Clear()
+    private void ClearLines()
     {
         for (int i = 0; i < height-1; i++)
         {
@@ -328,7 +348,6 @@ public class GameFieldBehaviour : MonoBehaviour
             }
         }
         
-        spawner.init(new Vector2((int)(width/2), (int)(height)-2));
     }
 
     private void PrepareForNewGame()
@@ -347,7 +366,8 @@ public class GameFieldBehaviour : MonoBehaviour
     {
         isGameStarted = true;
         PrepareForNewGame();
-        current = spawner.PopNext();
+        if(current==null) 
+            current = OnFigureNeeed?.Invoke();
         StartCoroutine("Game");
     }
 

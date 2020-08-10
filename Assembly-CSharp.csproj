@@ -55,6 +55,7 @@
      <Compile Include="Assets\Scripts\GameFieldEditor.cs" />
      <Compile Include="Assets\Scripts\CameraBehaviour.cs" />
      <Compile Include="Assets\Scripts\GameFieldBehaviour.cs" />
+     <Compile Include="Assets\Scripts\LivesBehaviour.cs" />
      <Compile Include="Assets\Scripts\MenuBehaviour.cs" />
      <Compile Include="Assets\Scripts\FigureMesh.cs" />
      <Compile Include="Assets\Scripts\ComboBehaviour.cs" />
