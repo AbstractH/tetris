@@ -203,7 +203,10 @@ public class Figure
                 Figure f1 = l1[i];
                 Figure f2 = l2[i];
                 if (!dpf)
+                {
                     dp = f1.Position - f2.Position;
+                    dpf = true;
+                }
                 if (f1.Position != f2.Position + dp)
                     return false;
                 if (f1.Rotation != f2.Rotation)
