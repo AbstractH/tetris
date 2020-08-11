@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -8,19 +9,18 @@ public class SpawnerBehaviour : MonoBehaviour
 {
     public GameFieldBehaviour game;
     public LivesBehaviour lives;
+    public LevelBehaviour level;
     
     private Vector2 spawnPosition;
     private Vector3 globalPosition;
     private Queue<Figure> next;
-    private Queue<Analizeable> analiers;
+    private Queue<Task> tasks;
     private FigureMesh mesh;
-    private Queue<HeartTask> tasks;
 
     private void Awake()
     {
         mesh = GetComponent<FigureMesh>();
         globalPosition = this.transform.position;
-        tasks = new Queue<HeartTask>();
         game.OnFigureNeeed = PopNext;
         game.OnFigureFallen += OnFigureFallen;
     }
@@ -33,20 +33,22 @@ public class SpawnerBehaviour : MonoBehaviour
     private void OnFigureFallen(Figure f)
     {
         //check for task
-        if (analiers.Count>0)
+        if (tasks.Count>0)
         {
-            Analizeable analizer = analiers.Dequeue();
-            if (analizer == null) return;
-            analizer.UpdateState(f);
+            Task task = tasks.Dequeue();
+            if (task == null) return;
+            task.UpdateState(f);
             try
             {
-                if (!analizer.NeedsMoreData()) return;
-                // tasks.Dequeue();
+                if (!task.NeedsMoreData()) return;
             }
             catch (HeartReward r)
-            {  
+            {
                 lives.AddLives(r.Volume);
-                //tasks.Dequeue();
+            }
+            catch (SpeedDownReward r)
+            {
+                level.DecrementSpeed(r.Volume);
             }
         }
     }
@@ -55,7 +57,7 @@ public class SpawnerBehaviour : MonoBehaviour
     {
         this.spawnPosition = position;
         next = new Queue<Figure>();
-        analiers = new Queue<Analizeable>();
+        tasks = new Queue<Task>();
         FillQueue();
         mesh.SetFigure(PeekNext());
         transform.position = globalPosition;
@@ -63,26 +65,41 @@ public class SpawnerBehaviour : MonoBehaviour
 
     private void FillQueue()
     {
-        switch (Random.Range(1,5))
+        // GenerateHeartTask();
+        // return;
+        switch (Random.Range(1,20))
         {
             case 1:
                 GenerateHeartTask();
                 break;
+            case 2:
+            case 3:
+            case 4:
+                GenerateSpeedTask();
+                break;
             default: 
                 next.Enqueue(Figure.GenerateRandom()); 
-                analiers.Enqueue(new EmptyTask());
+                tasks.Enqueue(new EmptyTask());
                 break;
         }
     }
 
-    private void GenerateHeartTask()
+    private void GenerateSpeedTask()
     {
-        HeartTask newTask = new HeartTask();
-        tasks.Enqueue(newTask);
+        Task newTask = new SpeedDownTask();
         foreach (Figure f in newTask.Figures)
         {
             next.Enqueue(f);
-            analiers.Enqueue(newTask);
+            tasks.Enqueue(newTask);
+        }
+    }
+    private void GenerateHeartTask()
+    {
+        Task newTask = new HeartTask();
+        foreach (Figure f in newTask.Figures)
+        {
+            next.Enqueue(f);
+            tasks.Enqueue(newTask);
         }
     }
     
@@ -90,7 +107,36 @@ public class SpawnerBehaviour : MonoBehaviour
     {
         return next.Peek();
     }
+
+    private void ShowFigure()
+    {
+        try
+        {
+            List<Figure> res;
+            Task currentTask = null;
+            Task nextTask = null;
+            currentTask = tasks.Peek();
+            if (!(currentTask is EmptyTask))
+            {
+                res = currentTask.Goal;
+                mesh.SetFigure(res);
+            }
+            else if (!(
+                (nextTask=tasks.AsEnumerable().ElementAt(1)) 
+                    is 
+                EmptyTask))
+            {
+                res = nextTask.Goal;
+                mesh.SetFigure(res);
+            }else
+                throw new Exception();
+        }
+        catch(Exception e)
+        {
+            mesh.SetFigure(PeekNext());
+        }
         
+    }
     public Figure PopNext()
     {
         Figure res = next.Dequeue();
@@ -98,29 +144,43 @@ public class SpawnerBehaviour : MonoBehaviour
         {
             FillQueue();
         }
-        mesh.SetFigure(PeekNext());
+        ShowFigure();
         transform.position = globalPosition;
         res.Move(spawnPosition);
         return res;
     }
 
-    public class HeartTask : Analizeable
+    private class SpeedDownTask : Task
     {
-        private List<Figure> state;
-        private List<Figure> goal;
-        private List<Figure> figures;
-
-        public List<Figure> Figures
+        public SpeedDownTask() : base()
         {
-            get { return figures; }
-            set { figures = value; }
+            Figure f1 = Figure.GenerateTFigure();
+            Figure f2 = Figure.GenerateTFigure();
+            figures.Add(f1);
+            figures.Add(f2);
+            goal.Add(f1
+                .Clone()
+                .Move(Vector2.zero)
+                .Rotate(GameFieldBehaviour.Direction.LEFT)
+            );
+            goal.Add(f2
+                .Clone()
+                .Move(Vector2.left*2)
+                .Rotate(GameFieldBehaviour.Direction.LEFT)
+            );
         }
 
-        public HeartTask()
+        protected override Reward OnTaskCompleted()
         {
-            state = new List<Figure>();
-            goal = new List<Figure>();
-            figures = new List<Figure>();
+            return new SpeedDownReward(1);
+        }
+    }
+
+    private class HeartTask : Task
+    {
+        
+        public HeartTask() : base()
+        {
             Figure f1 = Figure.GenerateTFigure();
             Figure f2 = Figure.GenerateTFigure();
             Figure f3 = Figure.GenerateNFigure();
@@ -146,47 +206,25 @@ public class SpawnerBehaviour : MonoBehaviour
             );
             goal.Add(f4
                 .Clone()
-                .Move(Vector2.up*2 + Vector2.right*2)
+                .Move(Vector2.up*2 + Vector2.right)
                 .Rotate(GameFieldBehaviour.Direction.RIGHT)
             );
             
         }
 
-        public void UpdateState(Figure f)
+        protected override Reward OnTaskCompleted()
         {
-            state.Add(f);
-        }
-
-        /// <summary>
-        /// Trows reward
-        /// </summary>
-        /// <returns>true if need more figures to make analise</returns>
-        public bool NeedsMoreData()
-        {
-            if (state.Count == goal.Count)
-            {
-                if (IsGoalArchived())
-                {
-                    throw new HeartReward(2);
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public bool IsGoalArchived()
-        {
-            return Figure.AreSame(goal,state);
+            return new HeartReward(2);
         }
     }
 
     public class HeartReward : Reward
     {
         public HeartReward(int hearts) : base(hearts) { }
+    }
+    public class SpeedDownReward : Reward
+    {
+        public SpeedDownReward(int speedDown) : base(speedDown) { }
     }
 
     public class Reward : Exception
@@ -205,22 +243,75 @@ public class SpawnerBehaviour : MonoBehaviour
         }
     }
     
-    private interface Analizeable
+    private abstract class Task
     {
-        void UpdateState(Figure f);
-        bool NeedsMoreData();
+        protected List<Figure> state;
+        protected List<Figure> goal;
+        protected List<Figure> figures;
+        public List<Figure> Figures
+        {
+            get { return figures; }
+            set { figures = value; }
+        }
+
+        public List<Figure> Goal => goal;
+
+        public Task()
+        {
+            state = new List<Figure>();
+            goal = new List<Figure>();
+            figures = new List<Figure>();
+        }
+
+        /// <summary>
+        /// Throws reward if goal archived
+        /// </summary>
+        /// <returns>true if need more figures to make analise</returns>
+        public virtual void UpdateState(Figure f)
+        {
+            state.Add(f);
+        }
+
+        public virtual bool NeedsMoreData()
+        {
+            if (state.Count == goal.Count)
+            {
+                if (IsGoalArchived())
+                {
+                    throw OnTaskCompleted();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        
+        public bool IsGoalArchived()
+        {
+            return Figure.AreSame(goal,state);
+        }
+
+        protected abstract Reward OnTaskCompleted();
     }
 
-    private class EmptyTask : Analizeable
+    private class EmptyTask : Task
     {
-        public void UpdateState(Figure f)
+        public override void UpdateState(Figure f)
         {
             return;
         }
 
-        public bool NeedsMoreData()
+        public override bool NeedsMoreData()
         {
             return false;
+        }
+
+        protected override Reward OnTaskCompleted()
+        {
+            throw new NotImplementedException();
         }
     }
 }
