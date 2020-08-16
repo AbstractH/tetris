@@ -1,41 +1,41 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Direction = GameFieldBehaviour.Direction;
-using Random = UnityEngine.Random;
+using Direction = Tetris.GameFieldBehaviour.Direction;
 
-public class Figure
+namespace Tetris
+{
+    public class Figure
     {
-        public Vector2 Position => position;
-        public int Rotation => rotation;
+        public Vector2 Position => _position;
+        public int Rotation => _rotation;
         
         
-        private List<Cell> cells;
-        private Vector2 position;
-        private int rotation;
+        private List<Cell> _cells;
+        private Vector2 _position;
+        private int _rotation;
 
         public Figure()
         {
-            cells = new List<Cell>();
-            position = Vector2.zero;
-            rotation = 0;
+            _cells = new List<Cell>();
+            _position = Vector2.zero;
+            _rotation = 0;
         }
 
         public Figure Rotate(Direction direction)
         {
             switch (direction)
             {
-                case Direction.LEFT: Rotate(1); break;
-                case Direction.RIGHT: Rotate(3); break;
+                case Direction.Left: Rotate(1); break;
+                case Direction.Right: Rotate(3); break;
             }
             return this;
         }
 
         private void Rotate(int multiplier)
         {
-            rotation = (rotation+multiplier)%4;
-            foreach (Cell cell in this.cells)
+            _rotation = (_rotation+multiplier)%4;
+            foreach (Cell cell in this._cells)
             {
                 cell.Position = RotateVector(cell.Position, 90 * multiplier);
             }
@@ -59,16 +59,16 @@ public class Figure
         {
             switch (direction)
             {
-                case Direction.DOWN: this.position+=Vector2.down; break;
-                case Direction.LEFT: this.position+=Vector2.left; break;
-                case Direction.RIGHT: this.position+=Vector2.right; break;
+                case Direction.Down: _position+=Vector2.down; break;
+                case Direction.Left: _position+=Vector2.left; break;
+                case Direction.Right: _position+=Vector2.right; break;
             }
             return this;
         }
 
         public Figure Move(Vector2 position)
         {
-            this.position = position;
+            this._position = position;
             return this;
         }
         
@@ -77,22 +77,24 @@ public class Figure
             List<Cell> res = CopyCells();
             foreach (Cell c in res)
             {
-                c.Position += this.position;
+                c.Position += _position;
             }
 
             return res;
         }
         public Figure Clone()
         {
-            Figure res = new Figure();
-            res.cells = CopyCells();
-            res.position = Vector2.zero+this.position;
+            Figure res = new Figure
+            {
+                _cells = CopyCells(), 
+                _position = Vector2.zero + _position
+            };
             return res;
         }
         private List<Cell> CopyCells()
         {
             List<Cell> res = new List<Cell>();
-            foreach (Cell cell in cells)
+            foreach (Cell cell in _cells)
             {
                 res.Add(new Cell(cell.Position));
             }
@@ -101,7 +103,7 @@ public class Figure
 
         public static Figure GenerateRandom()
         {
-            switch (Random.Range(0,7))
+            switch (UnityEngine.Random.Range(0,7))
             {
                 case 0: return GenerateIFigure();
                 case 1: return GenerateTFigure();
@@ -116,55 +118,55 @@ public class Figure
         public static Figure GenerateTFigure()
         {
             Figure res = new Figure();
-            res.cells.Add(new Cell(Vector2.zero));
-            res.cells.Add(new Cell(Vector2.left));
-            res.cells.Add(new Cell(Vector2.right));
-            res.cells.Add(new Cell(Vector2.up));
+            res._cells.Add(new Cell(Vector2.zero));
+            res._cells.Add(new Cell(Vector2.left));
+            res._cells.Add(new Cell(Vector2.right));
+            res._cells.Add(new Cell(Vector2.up));
             return res;
         }
         public static Figure GenerateIFigure()
         {
             Figure res = new Figure();
-            res.cells.Add(new Cell(Vector2.zero));
-            res.cells.Add(new Cell(Vector2.left));
-            res.cells.Add(new Cell(Vector2.left+Vector2.left));
-            res.cells.Add(new Cell(Vector2.right));
+            res._cells.Add(new Cell(Vector2.zero));
+            res._cells.Add(new Cell(Vector2.left));
+            res._cells.Add(new Cell(Vector2.left+Vector2.left));
+            res._cells.Add(new Cell(Vector2.right));
             return res;
         }
         public static Figure GenerateNFigure()
         {
             Figure res = new Figure();
-            res.cells.Add(new Cell(Vector2.zero));
-            res.cells.Add(new Cell(Vector2.up));
-            res.cells.Add(new Cell(Vector2.up+Vector2.left));
-            res.cells.Add(new Cell(Vector2.right));
+            res._cells.Add(new Cell(Vector2.zero));
+            res._cells.Add(new Cell(Vector2.up));
+            res._cells.Add(new Cell(Vector2.up+Vector2.left));
+            res._cells.Add(new Cell(Vector2.right));
             return res;
         }
         public static Figure GenerateИFigure()
         {
             Figure res = new Figure();
-            res.cells.Add(new Cell(Vector2.zero));
-            res.cells.Add(new Cell(Vector2.up));
-            res.cells.Add(new Cell(Vector2.up+Vector2.right));
-            res.cells.Add(new Cell(Vector2.left));
+            res._cells.Add(new Cell(Vector2.zero));
+            res._cells.Add(new Cell(Vector2.up));
+            res._cells.Add(new Cell(Vector2.up+Vector2.right));
+            res._cells.Add(new Cell(Vector2.left));
             return res;
         }
         public static Figure GenerateUFigure()
         {
             Figure res = new Figure();
-            res.cells.Add(new Cell(Vector2.zero));
-            res.cells.Add(new Cell(Vector2.left));
-            res.cells.Add(new Cell(Vector2.up));
-            res.cells.Add(new Cell(Vector2.up+Vector2.left));
+            res._cells.Add(new Cell(Vector2.zero));
+            res._cells.Add(new Cell(Vector2.left));
+            res._cells.Add(new Cell(Vector2.up));
+            res._cells.Add(new Cell(Vector2.up+Vector2.left));
             return res;
         }
         public static Figure GenerateLFigure()
         {
             Figure res = new Figure();
-            res.cells.Add(new Cell(Vector2.zero));
-            res.cells.Add(new Cell(Vector2.left));
-            res.cells.Add(new Cell(Vector2.right));
-            res.cells.Add(new Cell(Vector2.right+Vector2.up));
+            res._cells.Add(new Cell(Vector2.zero));
+            res._cells.Add(new Cell(Vector2.left));
+            res._cells.Add(new Cell(Vector2.right));
+            res._cells.Add(new Cell(Vector2.right+Vector2.up));
             return res;
         }
         /*
@@ -174,22 +176,22 @@ public class Figure
          * 1 1 0 0 1 1 1 1 1
          * 0 1 1 1 1 1 0 0
          * 0 0 0 0 0 0 0 0
-         * 0 1 1 1 1 0 ` 0
+         * 0 1 1 1 1 0 0 0
          */
 
         public static Figure GenerateГFigure()
         {
             Figure res = new Figure();
-            res.cells.Add(new Cell(Vector2.zero));
-            res.cells.Add(new Cell(Vector2.left));
-            res.cells.Add(new Cell(Vector2.right));
-            res.cells.Add(new Cell(Vector2.left+Vector2.up));
+            res._cells.Add(new Cell(Vector2.zero));
+            res._cells.Add(new Cell(Vector2.left));
+            res._cells.Add(new Cell(Vector2.right));
+            res._cells.Add(new Cell(Vector2.left+Vector2.up));
             return res;
         }
         public static Figure GenerateOFigure()
         {
             Figure res = new Figure();
-            res.cells.Add(new Cell(Vector2.zero));
+            res._cells.Add(new Cell(Vector2.zero));
             return res;
         }
 
@@ -217,4 +219,6 @@ public class Figure
 
         
     }
+
+}
 

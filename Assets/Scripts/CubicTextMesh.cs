@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using JetBrains.Annotations;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class CubicTextMesh : MonoBehaviour
 {
-    public string text;
-    public float Scale=1;
-    public bool isAnimated = false;
-    private List<GameObject> CubesOnSceen;
+    [SerializeField]
+    private string text;
+    [FormerlySerializedAs("Scale")] [SerializeField]
+    private float scale=1;
+    [SerializeField]
+    private bool isAnimated;
+    private List<GameObject> _cubesOnScreen;
     public string Text
     {
         get { return text; }
@@ -21,195 +22,195 @@ public class CubicTextMesh : MonoBehaviour
     }
 
     public GameObject voxel;
-    private VoxelPool pool;
-    private static Vector3 r = Vector3.right;
-    private static Vector3 u = Vector3.up;
-    private static Vector3 d = Vector3.down;
-    private Quaternion rotation;
+    private VoxelPool _pool;
+    private static readonly Vector3 _R = Vector3.right;
+    private static Vector3 _u = Vector3.up;
+    private static readonly Vector3 _D = Vector3.down;
+    private Quaternion _rotation;
     
-    private static int[,] l0 = new int[,]
+    private static readonly int[,] _L0 = new int[,]
     {
         {1,1,1},
         {1,0,1},
         {1,0,1},
         {1,1,1},
     }; 
-    private static int[,] l1 = new int[,]
+    private static readonly int[,] _L1 = new int[,]
     {
         {0,0,1},
         {0,0,1},
         {0,0,1},
         {0,0,1},
     }; 
-    private static int[,] l2 = new int[,]
+    private static readonly int[,] _L2 = new int[,]
     {
         {0,1,1},
         {0,0,1},
         {0,1,0},
         {1,1,1},
     }; 
-    private static int[,] l3 = new int[,]
+    private static readonly int[,] _L3 = new int[,]
     {
         {1,1,1},
         {0,1,0},
         {0,0,1},
         {1,1,1},
     }; 
-    private static int[,] l4 = new int[,]
+    private static readonly int[,] _L4 = new int[,]
     {
         {1,0,0},
         {1,0,1},
         {1,1,1},
         {0,0,1},
     }; 
-    private static int[,] l5 = new int[,]
+    private static readonly int[,] _L5 = new int[,]
     {
         {0,1,1},
         {0,1,0},
         {0,0,1},
         {1,1,1},
     };  
-    private static int[,] l6 = new int[,]
+    private static readonly int[,] _L6 = new int[,]
     {
         {1,1,1},
         {1,0,0},
         {1,1,0},
         {1,1,0},
     }; 
-    private static int[,] l7 = new int[,]
+    private static readonly int[,] _L7 = new int[,]
     {
         {1,1,1},
         {0,0,1},
         {0,0,1},
         {0,0,1},
     }; 
-    private static int[,] l8 = new int[,]
+    private static readonly int[,] _L8 = new int[,]
     {
         {0,1,1},
         {0,1,1},
         {1,0,1},
         {1,1,1},
     }; 
-    private static int[,] l9 = new int[,]
+    private static readonly int[,] _L9 = new int[,]
     {
         {0,1,1},
         {0,1,1},
         {0,0,1},
         {1,1,1},
     }; 
-    private static int[,] l = new int[,]
+    private static readonly int[,] _L = new int[,]
     {
         {0,0,0},
         {0,0,0},
         {0,0,0},
         {0,0,0},
     }; 
-    private static int[,] lright = new int[,]
+    private static readonly int[,] _LRIGHT = new int[,]
     {
         {0,0,0},
         {0,1,0},
         {0,1,1},
         {0,1,0},
     }; 
-    private static int[,] lleft = new int[,]
+    private static readonly int[,] _LLEFT = new int[,]
     {
         {0,0,0},
         {0,1,0},
         {1,1,0},
         {0,1,0},
     }; 
-    private static int[,] ldown = new int[,]
+    private static readonly int[,] _LDOWN = new int[,]
     {
         {0,0,0},
         {0,0,0},
         {1,1,1},
         {0,1,0},
     }; 
-    private static int[,] ldd = new int[,]
+    private static readonly int[,] _LDD = new int[,]
     {
         {1,1,1},
         {0,1,0},
         {1,1,1},
         {0,1,0},
     }; 
-    private static int[,] lrr = new int[,]
+    private static readonly int[,] _LRR = new int[,]
     {
         {0,0,0},
         {1,1,0},
         {0,0,1},
         {0,1,0},
     }; 
-    private static int[,] lrl = new int[,]
+    private static readonly int[,] _LRL = new int[,]
     {
         {0,0,0},
         {0,1,1},
         {1,0,0},
         {0,1,0},
     }; 
-    private static int[,] lA = new int[,]
+    private static readonly int[,] _L_A = new int[,]
     {
         {0,1,1},
         {1,0,1},
         {1,1,1},
         {1,0,1},
     }; 
-    private static int[,] lD = new int[,]
+    private static readonly int[,] _L_D = new int[,]
     {
         {1,1,0},
         {1,0,1},
         {1,0,1},
         {1,1,0},
     }; 
-    private static int[,] lS = new int[,]
+    private static readonly int[,] _L_S = new int[,]
     {
         {1,1,0},
         {1,1,1},
         {0,0,1},
         {1,1,1},
     }; 
-    private static int[,] lE = new int[,]
+    private static readonly int[,] _L_E = new int[,]
     {
         {1,1,1},
         {1,1,0},
         {1,0,0},
         {1,1,1},
     }; 
-    private static int[,] lQ = new int[,]
+    private static readonly int[,] _L_Q = new int[,]
     {
         {0,1,0},
         {1,0,1},
         {1,0,1},
         {0,1,1},
     }; 
-    private static int[,] lspace = new int[,]
+    private static readonly int[,] _LSPACE = new int[,]
     {
         {0,0,0},
         {0,0,0},
         {1,0,1},
         {1,1,1},
     }; 
-    private static int[,] lequal = new int[,]
+    private static readonly int[,] _LEQUAL = new int[,]
     {
         {0,0,0},
         {0,1,1},
         {0,0,0},
         {0,1,1},
     };
-    private static int[,] lx = new int[,]
+    private static readonly int[,] _LX = new int[,]
     {
         {0,0,0},
         {1,0,1},
         {0,1,0},
         {1,0,1},
     };
-    private static int[,] lp = new int[,]
+    private static readonly int[,] _LP = new int[,]
     {
         {0,0,0},
         {1,0,1},
         {1,1,1},
         {0,1,0},
     };
-    private static int[,] lC = new int[,]
+    private static readonly int[,] _L_C = new int[,]
     {
         
         {0,0,1,1,1,1,1,1,1,1,1,0,0},
@@ -227,8 +228,9 @@ public class CubicTextMesh : MonoBehaviour
 
     private void Awake()
     {
-        pool = new VoxelPool(voxel,this.transform);
-        this.rotation = this.transform.rotation;
+        Transform t = transform;
+        _pool = new VoxelPool(voxel,t);
+        _rotation = t.rotation;
     }
 
     void Start()
@@ -239,89 +241,59 @@ public class CubicTextMesh : MonoBehaviour
     void Update()
     {
         if(isAnimated)
-            foreach (GameObject v in CubesOnSceen)
-                v.transform.localScale = new Vector3(Scale,Scale,Scale);
+            foreach (GameObject v in _cubesOnScreen)
+                v.transform.localScale = new Vector3(scale,scale,scale);
     }
 
     private void CreateText()
     {
-        pool.ReleaseAll();
-        this.transform.rotation = Quaternion.identity;
-        CubesOnSceen = new List<GameObject>();
+        Transform t = transform;
+        _pool.ReleaseAll();
+        t.rotation = Quaternion.identity;
+        _cubesOnScreen = new List<GameObject>();
         if (text != null)
         {
             for (int i = 0; i < Text.Length; i++)
             {
-                CubesOnSceen.AddRange(BuildLetter(text[i], (Vector3.right * 4) * i));
+                _cubesOnScreen.AddRange(BuildLetter(text[i], Vector3.right * (4 * i)));
             }
         }
 
-        this.transform.rotation = this.rotation;
+        t.rotation = _rotation;
     }
-    
-    /* m
-     * 0 0 -15
-     * 100 0 0
-     * l
-     * 0 -11 10
-     * -60 0 0
-     * c
-     * 5 -30 -10
-     * -115 0 0
-     * c2
-     * 0.5 0.5 -15
-     * -25 15 0
-     *
-     *
-     */
 
     private List<GameObject> BuildLetter(char c, Vector3 p)
     {
         switch (c)
         {
-            case '0': return BuildLetterFromArray(p,l0,4,3); break;
-            case '1': return BuildLetterFromArray(p,l1,4,3); break;
-            case '2': return BuildLetterFromArray(p,l2,4,3); break;
-            case '3': return BuildLetterFromArray(p,l3,4,3); break;
-            case '4': return BuildLetterFromArray(p,l4,4,3); break;
-            case '5': return BuildLetterFromArray(p,l5,4,3); break;
-            case '6': return BuildLetterFromArray(p,l6,4,3); break;
-            case '7': return BuildLetterFromArray(p,l7,4,3); break;
-            case '8': return BuildLetterFromArray(p,l8,4,3); break;
-            case '9': return BuildLetterFromArray(p,l9,4,3); break;
-            case 'A': return BuildLetterFromArray(p,lA,4,3); break;
-            case 'D': return BuildLetterFromArray(p,lD,4,3); break;
-            case 'S': return BuildLetterFromArray(p,lS,4,3); break;
-            case 'Q': return BuildLetterFromArray(p,lQ,4,3); break;
-            case 'E': return BuildLetterFromArray(p,lE,4,3); break;
-            case ' ': return BuildLetterFromArray(p,lspace,4,3); break;
-            case '>': return BuildLetterFromArray(p,lright,4,3); break;
-            case '<': return BuildLetterFromArray(p,lleft,4,3); break;
-            case 'd': return BuildLetterFromArray(p,ldown,4,3); break;
-            case 'y': return BuildLetterFromArray(p,ldd,4,3); break;
-            case '=': return BuildLetterFromArray(p,lequal,4,3); break;
-            case 'u': return BuildLetterFromArray(p,lrr,4,3); break;
-            case 'i': return BuildLetterFromArray(p,lrl,4,3); break;
-            case 'x': return BuildLetterFromArray(p,lx,4,3); break;
-            case 'p': return BuildLetterFromArray(p,lp,4,3); break;
-            case 'C': return BuildLetterFromArray(p,lC,10,13); break;
-            default: return BuildLetterFromArray(p,l,4,3); break;
+            case '0': return BuildLetterFromArray(p,_L0,4,3);
+            case '1': return BuildLetterFromArray(p,_L1,4,3);
+            case '2': return BuildLetterFromArray(p,_L2,4,3);
+            case '3': return BuildLetterFromArray(p,_L3,4,3); 
+            case '4': return BuildLetterFromArray(p,_L4,4,3); 
+            case '5': return BuildLetterFromArray(p,_L5,4,3); 
+            case '6': return BuildLetterFromArray(p,_L6,4,3); 
+            case '7': return BuildLetterFromArray(p,_L7,4,3); 
+            case '8': return BuildLetterFromArray(p,_L8,4,3); 
+            case '9': return BuildLetterFromArray(p,_L9,4,3); 
+            case 'A': return BuildLetterFromArray(p,_L_A,4,3); 
+            case 'D': return BuildLetterFromArray(p,_L_D,4,3); 
+            case 'S': return BuildLetterFromArray(p,_L_S,4,3); 
+            case 'Q': return BuildLetterFromArray(p,_L_Q,4,3); 
+            case 'E': return BuildLetterFromArray(p,_L_E,4,3); 
+            case ' ': return BuildLetterFromArray(p,_LSPACE,4,3); 
+            case '>': return BuildLetterFromArray(p,_LRIGHT,4,3); 
+            case '<': return BuildLetterFromArray(p,_LLEFT,4,3); 
+            case 'd': return BuildLetterFromArray(p,_LDOWN,4,3); 
+            case 'y': return BuildLetterFromArray(p,_LDD,4,3); 
+            case '=': return BuildLetterFromArray(p,_LEQUAL,4,3); 
+            case 'u': return BuildLetterFromArray(p,_LRR,4,3); 
+            case 'i': return BuildLetterFromArray(p,_LRL,4,3); 
+            case 'x': return BuildLetterFromArray(p,_LX,4,3); 
+            case 'p': return BuildLetterFromArray(p,_LP,4,3); 
+            case 'C': return BuildLetterFromArray(p,_L_C,10,13); 
+            default: return BuildLetterFromArray(p,_L,4,3); 
         }
-    }
-
-    private void Build0(Vector3 p)
-    {
-        GameObject v;
-        v = pool.Get(); v.transform.position = p;
-        v = pool.Get(); v.transform.position = p+r;
-        v = pool.Get(); v.transform.position = p+r*2;
-        v = pool.Get(); v.transform.position = p+r*2+u;
-        v = pool.Get(); v.transform.position = p+r*2+u*2;
-        v = pool.Get(); v.transform.position = p+r*2+u*3;
-        v = pool.Get(); v.transform.position = p+r+u*3;
-        v = pool.Get(); v.transform.position = p+u*3;
-        v = pool.Get(); v.transform.position = p+u*2;
-        v = pool.Get(); v.transform.position = p+u;
     }
 
     private List<GameObject> BuildLetterFromArray(Vector3 p, int[,] l, int height, int width)
@@ -331,8 +303,8 @@ public class CubicTextMesh : MonoBehaviour
         for (int j = 0; j < width; j++)
             if (l[i, j] == 1)
             {
-                GameObject v = pool.Get();
-                v.transform.localPosition = p + r * j + d * i;
+                GameObject v = _pool.Get();
+                v.transform.localPosition = p + _R * j + _D * i;
                 v.transform.rotation = Quaternion.identity;
                 res.Add(v);
             }
@@ -341,61 +313,66 @@ public class CubicTextMesh : MonoBehaviour
     }
     private class VoxelPool
     {
-        private GameObject voxel;
-        private Transform parent;
-        private Stack<GameObject> freeVoxels;
-        private List<GameObject> busyVoxels;
-        private static int EXTEND_SIZE = 10;
+        private readonly GameObject _voxel;
+        private readonly Transform _parent;
+        private readonly Stack<GameObject> _freeVoxels;
+        private readonly List<GameObject> _busyVoxels;
+        private static readonly int _EXTEND_SIZE = 10;
         
         public VoxelPool(GameObject voxel, Transform parent)
         {
-            this.voxel = voxel;
-            this.parent = parent;
-            freeVoxels = new Stack<GameObject>();
-            busyVoxels = new List<GameObject>();
+            _voxel = voxel;
+            _parent = parent;
+            _freeVoxels = new Stack<GameObject>();
+            _busyVoxels = new List<GameObject>();
             Extend();
         }
 
         private void Extend()
         {
-            for (int i = 0; i < EXTEND_SIZE; i++)
+            for (int i = 0; i < _EXTEND_SIZE; i++)
             {
-                GameObject v = Instantiate(voxel, Vector3.zero, Quaternion.identity, parent);
+                GameObject v = Instantiate(
+                    _voxel, 
+                    Vector3.zero, 
+                    Quaternion.identity, 
+                    _parent
+                    );
                 v.SetActive(false);
-                freeVoxels.Push(v);
+                _freeVoxels.Push(v);
             }
         }
 
         public void Release(GameObject voxel)
         {
-            busyVoxels.Remove(voxel);
+            _busyVoxels.Remove(voxel);
             voxel.SetActive(false);
-            freeVoxels.Push(voxel);
+            _freeVoxels.Push(voxel);
         }
 
         public void ReleaseAll()
         {
-            for (int i = 0; i < busyVoxels.Count; i++)
+            for (int i = 0; i < _busyVoxels.Count; i++)
             {
-                GameObject v = busyVoxels[i];
+                GameObject v = _busyVoxels[i];
                 v.SetActive(false);
-                freeVoxels.Push(v);
+                _freeVoxels.Push(v);
             }
-            busyVoxels.Clear();
+            _busyVoxels.Clear();
         }
 
         public GameObject Get()
         {
-            if (freeVoxels.Count == 0)
+            if (_freeVoxels.Count == 0)
             {
                 Extend();
                 return Get();
             }
             else
             {
-                GameObject v = freeVoxels.Pop();
+                GameObject v = _freeVoxels.Pop();
                 v.SetActive(true);
-                busyVoxels.Add(v);
+                _busyVoxels.Add(v);
                 return v;
             }
         }

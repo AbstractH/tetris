@@ -1,26 +1,21 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Numerics;
-using UnityEditor;
-using UnityEngine;
-using Quaternion = UnityEngine.Quaternion;
-using Random = UnityEngine.Random;
-using Vector2 = UnityEngine.Vector2;
-using Vector3 = UnityEngine.Vector3;
+﻿using UnityEngine;
 
-[ExecuteInEditMode]
-public class GameFieldEditor : GameFieldBehaviour
+namespace Tetris
 {
-    void Start()
+    
+    [ExecuteInEditMode]
+    public class GameFieldEditor : GameFieldBehaviour
     {
-        Debug.Log("Eidtor start");
-        base.init();
+        void Start()
+        {
+            Debug.Log("Editor start");
+            base.Init();
+        }
+
+        void Update()
+        {
+            Debug.Log("Editor update");
+        }
     }
 
-    void Update()
-    {
-        Debug.Log("Eidtor update");
-    }
 }

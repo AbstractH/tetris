@@ -1,23 +1,21 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿
 using UnityEngine;
 
-public class ParticleTest : MonoBehaviour
+namespace Tetris
 {
-    public CellBehaviour[] cells;
-    void Start()
+    public class ParticleTest : MonoBehaviour
     {
-        
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown("space"))
+        public CellBehaviour[] cells;
+        void Update()
         {
-            foreach (CellBehaviour cell in cells)
+            if (Input.GetKeyDown("space"))
             {
-                cell.Explode();
+                foreach (CellBehaviour cell in cells)
+                {
+                    cell.Explode();
+                }
             }
         }
     }
+
 }

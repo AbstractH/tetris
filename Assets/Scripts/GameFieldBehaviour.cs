@@ -5,102 +5,109 @@ using System.IO;
 using System.Numerics;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using Quaternion = UnityEngine.Quaternion;
 using Random = UnityEngine.Random;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
-public class GameFieldBehaviour : MonoBehaviour
+namespace Tetris
 {
-    public delegate RESULT Request<RESULT>();
+   public class GameFieldBehaviour : MonoBehaviour
+{
+    public delegate TResult Request<out TResult>();
     
-    public int height;
-    public int width;
+    [SerializeField]
+    private int height;
+    [SerializeField]
+    private int width;
+    public int Height => height;
+    public int Width => width;
     public GameObject cellPrefab;
     public Material filledMaterial;
     public Material emptyMaterial;
     public Material figureMaterial;
-    private Cell[,] cells;
-    private Dictionary<Cell, Renderer> screenCells;
-    private Dictionary<Cell, ParticleSystem> particles;
-    private Figure current;
-    private bool isGameStarted;
-    private CubicTextMesh gg;
+    private Cell[,] _cells;
+    private Dictionary<Cell, Renderer> _screenCells;
+    private Dictionary<Cell, ParticleSystem> _particles;
+    private Figure _current;
+    private bool _isGameStarted;
+    private CubicTextMesh _gg;
     
     public ScoreBehaviour score;
     public LevelBehaviour level;
     public ComboBehaviour combo;
-    public Action OnGameOver;
-    public Request<Figure> OnFigureNeeed;
-    public Action<Figure> OnFigureFallen;
-    public Request<bool> OnLifeRequested;
+    public event Action OnGameOver = delegate { };
+    public event Request<Figure> OnFigureNeeded = () => null;
+    public event Action<Figure> OnFigureFallen = delegate {  };
+    public event Request<bool> OnLifeRequested = () => false;
 
     public enum Direction
     {
-        LEFT, RIGHT, DOWN
+        Left, Right, Down
     }
 
     private void Awake()
     {
-        this.gg = GetComponentInChildren<CubicTextMesh>();
+        this._gg = GetComponentInChildren<CubicTextMesh>();
     }
 
     void Start()
     {
-        init();
+        Init();
     }
     
     void Update()
     {
-        if (isGameStarted) HandleControls();    
+        if (_isGameStarted) HandleControls();    
         Display();
     }
 
     private void HandleControls()
     {
-        if (Input.GetKeyDown("a"))
-            StartCoroutine("MoveLeft");
-        if(Input.GetKeyUp("a"))
-            StopCoroutine("MoveLeft");
-        if (Input.GetKeyDown("d"))
-            StartCoroutine("MoveRight");
-        if (Input.GetKeyUp("d"))
-            StopCoroutine("MoveRight");
-        if (Input.GetKeyDown("s"))
-            StartCoroutine("MoveDown");
-        if (Input.GetKeyUp("s"))
-            StopCoroutine("MoveDown");
+        if (Input.GetKeyDown(KeyCode.A))
+            StartCoroutine(nameof(MoveLeft));
+        if(Input.GetKeyUp(KeyCode.A))
+            StopCoroutine(nameof(MoveLeft));
+        if (Input.GetKeyDown(KeyCode.D))
+            StartCoroutine(nameof(MoveRight));
+        if (Input.GetKeyUp(KeyCode.D))
+            StopCoroutine(nameof(MoveRight));
+        if (Input.GetKeyDown(KeyCode.S))
+            StartCoroutine(nameof(MoveDown));
+        if (Input.GetKeyUp(KeyCode.S))
+            StopCoroutine(nameof(MoveDown));
 
-        if (Input.GetKeyDown("space"))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            while (CheckIfPositionAllowed(current, Direction.DOWN))
+            while (CheckIfPositionAllowed(_current, Direction.Down))
             {
-                current.Move(Direction.DOWN);
+                _current.Move(Direction.Down);
             }
             HandleFallenFigure();
         }
 
-        if (Input.GetKeyDown("q"))
-            Rotate(Direction.LEFT);
-        if (Input.GetKeyDown("e"))
-            Rotate(Direction.RIGHT);
+        if (Input.GetKeyDown(KeyCode.Q))
+            Rotate(Direction.Left);
+        if (Input.GetKeyDown(KeyCode.E))
+            Rotate(Direction.Right);
     }
 
     private void Rotate(Direction direction)
     {
-        if (CheckIfRotationAllowed(current, direction))
+        if (CheckIfRotationAllowed(_current, direction))
         {
-            current.Rotate(direction);
+            _current.Rotate(direction);
         }
         else
         {
-            if (CheckIfRotationAllowed(current.Clone().Move(Direction.LEFT), direction))
+            if (CheckIfRotationAllowed(_current.Clone().Move(Direction.Left), direction))
             {
-                current.Move(Direction.LEFT).Rotate(direction);
+                _current.Move(Direction.Left).Rotate(direction);
             }
-            else if(CheckIfRotationAllowed(current.Clone().Move(Direction.RIGHT), direction))
+            else if(CheckIfRotationAllowed(_current.Clone().Move(Direction.Right), direction))
             {
-                current.Move(Direction.RIGHT).Rotate(direction);
+                _current.Move(Direction.Right).Rotate(direction);
             }
         }
     }
@@ -111,8 +118,8 @@ public class GameFieldBehaviour : MonoBehaviour
 
         while (true)
         {
-            if(CheckIfPositionAllowed(current, Direction.LEFT))
-                current.Move(Direction.LEFT);
+            if(CheckIfPositionAllowed(_current, Direction.Left))
+                _current.Move(Direction.Left);
             yield return new WaitForSeconds(delay);
             if (delay > 0.01f)
                 delay /= 4f;
@@ -125,8 +132,8 @@ public class GameFieldBehaviour : MonoBehaviour
 
         while (true)
         {
-            if(CheckIfPositionAllowed(current, Direction.RIGHT))
-                current.Move(Direction.RIGHT);
+            if(CheckIfPositionAllowed(_current, Direction.Right))
+                _current.Move(Direction.Right);
             yield return new WaitForSeconds(delay);
             if (delay > 0.01f)
                 delay /= 4f;
@@ -139,8 +146,8 @@ public class GameFieldBehaviour : MonoBehaviour
 
         while (true)
         {
-            if(CheckIfPositionAllowed(current, Direction.DOWN))
-                current.Move(Direction.DOWN);
+            if(CheckIfPositionAllowed(_current, Direction.Down))
+                _current.Move(Direction.Down);
             yield return new WaitForSeconds(delay);
             if (delay > 0.1f)
                 delay /= 2;
@@ -149,9 +156,9 @@ public class GameFieldBehaviour : MonoBehaviour
 
     IEnumerator GameOver()
     {
-        StopCoroutine("Game");
-        isGameStarted = false;
-        this.gg.Text = "C";
+        StopCoroutine(nameof(Game));
+        _isGameStarted = false;
+        this._gg.Text = "C";
         yield return new WaitForSeconds(2f);
         OnGameOver?.Invoke();
         yield return new WaitForSeconds(2f);
@@ -164,13 +171,13 @@ public class GameFieldBehaviour : MonoBehaviour
         {
             for (int j = 0; j < width; j++)
             {
-                Renderer screenCell = screenCells[cells[i, j]];
-                if (cells[i, j].IsFilled)
+                Renderer screenCell = _screenCells[_cells[i, j]];
+                if (_cells[i, j].IsFilled)
                 {
                     screenCell.material = filledMaterial;
                     screenCell.transform.localScale = new Vector3(1f,1f,1f);
                 }
-                else if (DoesCellContainFigure(cells[i,j]))
+                else if (DoesCellContainFigure(_cells[i,j]))
                 {
                     screenCell.material = figureMaterial;
                     screenCell.transform.localScale = new Vector3(0.7f,0.7f,0.7f);
@@ -188,8 +195,8 @@ public class GameFieldBehaviour : MonoBehaviour
 
     private bool DoesCellContainFigure(Cell cell)
     {
-        if (current == null) return false;
-        foreach (Cell figureCell in current.GetCells())
+        if (_current == null) return false;
+        foreach (Cell figureCell in _current.GetCells())
         {
             if (figureCell.IsOnSamePosition(cell))
                 return true;
@@ -205,7 +212,7 @@ public class GameFieldBehaviour : MonoBehaviour
             {
                 Fall();
             }
-            catch (CantFallException e)
+            catch (CantFallException)
             {
                 HandleFallenFigure();
             }
@@ -216,15 +223,15 @@ public class GameFieldBehaviour : MonoBehaviour
 
     private void HandleFallenFigure()
     {
-        OnFigureFallen?.Invoke(current);
+        OnFigureFallen?.Invoke(_current);
         Fill();
         ClearLines();
-        Figure next = OnFigureNeeed?.Invoke();
-        if (CheckIfPositionAllowed(next, next.Position))
-            current = next;
+        Figure next = OnFigureNeeded?.Invoke();
+        if (next != null && CheckIfPositionAllowed(next, next.Position))
+            _current = next;
         else
             if(!SpendLife())
-                StartCoroutine("GameOver");
+                StartCoroutine(nameof(GameOver));
     }
 
     private bool SpendLife()
@@ -242,7 +249,7 @@ public class GameFieldBehaviour : MonoBehaviour
 
     private void ClearField()
     {
-        foreach (Cell c in cells)
+        foreach (Cell c in _cells)
         {
             c.IsFilled = false;
         }
@@ -252,18 +259,18 @@ public class GameFieldBehaviour : MonoBehaviour
 
     private void Fall() 
     {
-        Figure clone = current.Clone();
-        clone.Move(Direction.DOWN);
+        Figure clone = _current.Clone();
+        clone.Move(Direction.Down);
         if (CheckIfPositionAllowed(clone, clone.Position))
-            current.Move(Direction.DOWN);
+            _current.Move(Direction.Down);
         else
             throw new CantFallException();
     }
     private void Fill()
     {
-        foreach (Cell fieldCell in cells)
+        foreach (Cell fieldCell in _cells)
         {
-            foreach (Cell figureCell in current.GetCells())
+            foreach (Cell figureCell in _current.GetCells())
             {
                 if (figureCell.IsOnSamePosition(fieldCell))
                 {
@@ -280,19 +287,19 @@ public class GameFieldBehaviour : MonoBehaviour
             bool lineIsFilled = true;
             for (int j = 0; j < width; j++)
             {
-                lineIsFilled &= cells[i, j].IsFilled ;
+                lineIsFilled &= _cells[i, j].IsFilled ;
             }
 
             if (lineIsFilled)
             {
                 for (int j = 0; j < width; j++)
                 {
-                    ParticleSystem p = particles[cells[i, j]];
+                    ParticleSystem p = _particles[_cells[i, j]];
                     p.Play();
                 }
                 for (int h = i; h < height - 1; h++)
                 for (int j = 0; j < width; j++)
-                    cells[h, j].IsFilled = cells[h + 1, j].IsFilled;
+                    _cells[h, j].IsFilled = _cells[h + 1, j].IsFilled;
                 i--;
                 score.UpdateScore();
                 level.UpdateProgress();
@@ -320,7 +327,7 @@ public class GameFieldBehaviour : MonoBehaviour
         foreach (Cell figureCell in cells)
         {
             bool found = false;
-            foreach (Cell fieldCell in this.cells)
+            foreach (Cell fieldCell in this._cells)
             {
                 if (figureCell.IsOnSamePosition(fieldCell))
                 {
@@ -334,17 +341,17 @@ public class GameFieldBehaviour : MonoBehaviour
         return true;
     }
 
-    protected void init()
+    protected void Init()
     {
-        cells = new Cell[height,width];
-        screenCells = new Dictionary<Cell, Renderer>();
-        particles = new Dictionary<Cell, ParticleSystem>();
+        _cells = new Cell[height,width];
+        _screenCells = new Dictionary<Cell, Renderer>();
+        _particles = new Dictionary<Cell, ParticleSystem>();
         
         for (int i = 0; i < height; i++)
         {
             for (int j = 0; j < width; j++)
             {
-                cells[i,j] = new Cell(new Vector2(j,i));
+                _cells[i,j] = new Cell(new Vector2(j,i));
                 GameObject screenCell = Instantiate(
                     cellPrefab,
                     new Vector3(j, i, 0), 
@@ -352,8 +359,8 @@ public class GameFieldBehaviour : MonoBehaviour
                 Renderer cellRenderer = screenCell.GetComponent<Renderer>();
                 ParticleSystem cellParticle = screenCell.GetComponent<ParticleSystem>();
                 screenCell.transform.parent = transform;
-                screenCells.Add(cells[i,j],cellRenderer);
-                particles.Add(cells[i,j],cellParticle);
+                _screenCells.Add(_cells[i,j],cellRenderer);
+                _particles.Add(_cells[i,j],cellParticle);
             }
         }
         
@@ -362,8 +369,8 @@ public class GameFieldBehaviour : MonoBehaviour
     private void PrepareForNewGame()
     {
         StopAllCoroutines();
-        this.gg.Text = "";
-        foreach (Cell c in cells)
+        _gg.Text = "";
+        foreach (Cell c in _cells)
             c.Clear();
         
         level.Clear();
@@ -373,12 +380,14 @@ public class GameFieldBehaviour : MonoBehaviour
     
     public void NewGame()
     {
-        isGameStarted = true;
+        _isGameStarted = true;
         PrepareForNewGame();
-        if(current==null) 
-            current = OnFigureNeeed?.Invoke();
-        StartCoroutine("Game");
+        if(_current==null) 
+            _current = OnFigureNeeded?.Invoke();
+        StartCoroutine(nameof(Game));
     }
 
     
+}
+ 
 }

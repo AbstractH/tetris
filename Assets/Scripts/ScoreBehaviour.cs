@@ -1,31 +1,33 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class ScoreBehaviour : MonoBehaviour
+namespace Tetris
 {
-    private long score;
-    public ComboBehaviour CombpBehaviour;
-    private CubicTextMesh mesh;
-
-    private void Awake()
+    public class ScoreBehaviour : MonoBehaviour
     {
-        mesh = GetComponent<CubicTextMesh>();
+        private long _score;
+        public ComboBehaviour comboBehaviour;
+        private CubicTextMesh _mesh;
+
+        private void Awake()
+        {
+            _mesh = GetComponent<CubicTextMesh>();
+        }
+
+        public void UpdateScore()
+        {
+            int baseScore = 2;
+            int score = (int)Math.Pow(baseScore,comboBehaviour.Combo);
+            this._score+=score;
+            comboBehaviour.AddCombo();
+            _mesh.Text = this._score.ToString();
+        }
+
+        public void Clear()
+        {
+            this._score = 0;
+            _mesh.Text = _score.ToString();
+        }
     }
 
-    public void UpdateScore()
-    {
-        int baseScore = 2;
-        int score = (int)Math.Pow(baseScore,CombpBehaviour.Combo);
-        this.score+=score;
-        CombpBehaviour.AddCombo();
-        mesh.Text = this.score.ToString();
-    }
-
-    public void Clear()
-    {
-        this.score = 0;
-        mesh.Text = score.ToString();
-    }
 }

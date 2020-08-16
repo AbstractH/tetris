@@ -1,46 +1,49 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
-public class SpawnerBehaviour : MonoBehaviour
+namespace Tetris
 {
-    public GameFieldBehaviour game;
-    public LivesBehaviour lives;
-    public LevelBehaviour level;
+   public class SpawnerBehaviour : MonoBehaviour
+{
+    [SerializeField]
+    private GameFieldBehaviour game;
+    [SerializeField]
+    private LivesBehaviour lives;
+    [SerializeField]
+    private LevelBehaviour level;
     
-    private Vector2 spawnPosition;
-    private Vector3 globalPosition;
-    private Queue<Figure> next;
-    private Queue<Task> tasks;
-    private FigureMesh mesh;
+    private Vector2 _spawnPosition;
+    private Vector3 _globalPosition;
+    private Queue<Figure> _next;
+    private Queue<Task> _tasks;
+    private FigureMesh _mesh;
 
     private void Awake()
     {
-        mesh = GetComponent<FigureMesh>();
-        globalPosition = this.transform.position;
-        game.OnFigureNeeed = PopNext;
+        _mesh = GetComponent<FigureMesh>();
+        _globalPosition = this.transform.position;
+        game.OnFigureNeeded += PopNext;
         game.OnFigureFallen += OnFigureFallen;
     }
 
     private void Start()
     {
-        init(new Vector2((int)(game.width/2), (int)(game.height)-2));
+        Init(new Vector2((int)(game.Width/2), (int)(game.Height)-2));
     }
 
     private void OnFigureFallen(Figure f)
     {
         //check for task
-        if (tasks.Count>0)
+        if (_tasks.Count>0)
         {
-            Task task = tasks.Dequeue();
+            Task task = _tasks.Dequeue();
             if (task == null) return;
             task.UpdateState(f);
             try
             {
-                if (!task.NeedsMoreData()) return;
+                if (!task.DoesItNeedMoreData()) return;
             }
             catch (HeartReward r)
             {
@@ -53,21 +56,19 @@ public class SpawnerBehaviour : MonoBehaviour
         }
     }
 
-    public void init(Vector2 position)
+    private void Init(Vector2 position)
     {
-        this.spawnPosition = position;
-        next = new Queue<Figure>();
-        tasks = new Queue<Task>();
+        this._spawnPosition = position;
+        _next = new Queue<Figure>();
+        _tasks = new Queue<Task>();
         FillQueue();
-        mesh.SetFigure(PeekNext());
-        transform.position = globalPosition;
+        _mesh.SetFigure(PeekNext());
+        transform.position = _globalPosition;
     }
 
     private void FillQueue()
     {
-        // GenerateHeartTask();
-        // return;
-        switch (Random.Range(1,20))
+        switch (UnityEngine.Random.Range(1,20))
         {
             case 1:
                 GenerateHeartTask();
@@ -78,8 +79,8 @@ public class SpawnerBehaviour : MonoBehaviour
                 GenerateSpeedTask();
                 break;
             default: 
-                next.Enqueue(Figure.GenerateRandom()); 
-                tasks.Enqueue(new EmptyTask());
+                _next.Enqueue(Figure.GenerateRandom()); 
+                _tasks.Enqueue(new EmptyTask());
                 break;
         }
     }
@@ -89,8 +90,8 @@ public class SpawnerBehaviour : MonoBehaviour
         Task newTask = new SpeedDownTask();
         foreach (Figure f in newTask.Figures)
         {
-            next.Enqueue(f);
-            tasks.Enqueue(newTask);
+            _next.Enqueue(f);
+            _tasks.Enqueue(newTask);
         }
     }
     private void GenerateHeartTask()
@@ -98,14 +99,14 @@ public class SpawnerBehaviour : MonoBehaviour
         Task newTask = new HeartTask();
         foreach (Figure f in newTask.Figures)
         {
-            next.Enqueue(f);
-            tasks.Enqueue(newTask);
+            _next.Enqueue(f);
+            _tasks.Enqueue(newTask);
         }
     }
     
     public Figure PeekNext()
     {
-        return next.Peek();
+        return _next.Peek();
     }
 
     private void ShowFigure()
@@ -115,38 +116,38 @@ public class SpawnerBehaviour : MonoBehaviour
             List<Figure> res;
             Task currentTask = null;
             Task nextTask = null;
-            currentTask = tasks.Peek();
+            currentTask = _tasks.Peek();
             if (!(currentTask is EmptyTask))
             {
                 res = currentTask.Goal;
-                mesh.SetFigure(res);
+                _mesh.SetFigure(res);
             }
             else if (!(
-                (nextTask=tasks.AsEnumerable().ElementAt(1)) 
+                (nextTask=_tasks.AsEnumerable().ElementAt(1)) 
                     is 
                 EmptyTask))
             {
                 res = nextTask.Goal;
-                mesh.SetFigure(res);
+                _mesh.SetFigure(res);
             }else
                 throw new Exception();
         }
-        catch(Exception e)
+        catch(Exception)
         {
-            mesh.SetFigure(PeekNext());
+            _mesh.SetFigure(PeekNext());
         }
         
     }
     public Figure PopNext()
     {
-        Figure res = next.Dequeue();
-        if (next.Count == 0)
+        Figure res = _next.Dequeue();
+        if (_next.Count == 0)
         {
             FillQueue();
         }
         ShowFigure();
-        transform.position = globalPosition;
-        res.Move(spawnPosition);
+        transform.position = _globalPosition;
+        res.Move(_spawnPosition);
         return res;
     }
 
@@ -156,17 +157,17 @@ public class SpawnerBehaviour : MonoBehaviour
         {
             Figure f1 = Figure.GenerateTFigure();
             Figure f2 = Figure.GenerateTFigure();
-            figures.Add(f1);
+            Figures.Add(f1);
             figures.Add(f2);
             goal.Add(f1
                 .Clone()
                 .Move(Vector2.zero)
-                .Rotate(GameFieldBehaviour.Direction.LEFT)
+                .Rotate(GameFieldBehaviour.Direction.Left)
             );
             goal.Add(f2
                 .Clone()
                 .Move(Vector2.left*2)
-                .Rotate(GameFieldBehaviour.Direction.LEFT)
+                .Rotate(GameFieldBehaviour.Direction.Left)
             );
         }
 
@@ -192,8 +193,8 @@ public class SpawnerBehaviour : MonoBehaviour
             goal.Add(f1
                 .Clone()
                 .Move(Vector2.zero)
-                .Rotate(GameFieldBehaviour.Direction.LEFT)
-                .Rotate(GameFieldBehaviour.Direction.LEFT)
+                .Rotate(GameFieldBehaviour.Direction.Left)
+                .Rotate(GameFieldBehaviour.Direction.Left)
             );
             goal.Add(f2
                 .Clone()
@@ -202,12 +203,12 @@ public class SpawnerBehaviour : MonoBehaviour
             goal.Add(f3
                 .Clone()
                 .Move(Vector2.up*2+Vector2.left*2)
-                .Rotate(GameFieldBehaviour.Direction.RIGHT)
+                .Rotate(GameFieldBehaviour.Direction.Right)
             );
             goal.Add(f4
                 .Clone()
                 .Move(Vector2.up*2 + Vector2.right)
-                .Rotate(GameFieldBehaviour.Direction.RIGHT)
+                .Rotate(GameFieldBehaviour.Direction.Right)
             );
             
         }
@@ -229,17 +230,17 @@ public class SpawnerBehaviour : MonoBehaviour
 
     public class Reward : Exception
     {
-        private int volume;
+        private int _volume;
 
         public int Volume
         {
-            get { return volume; }
+            get { return _volume; }
             private set {}
         }
 
         public Reward(int volume)
         {
-            this.volume = volume;
+            this._volume = volume;
         }
     }
     
@@ -256,23 +257,22 @@ public class SpawnerBehaviour : MonoBehaviour
 
         public List<Figure> Goal => goal;
 
-        public Task()
+        protected Task()
         {
             state = new List<Figure>();
             goal = new List<Figure>();
             figures = new List<Figure>();
         }
-
-        /// <summary>
-        /// Throws reward if goal archived
-        /// </summary>
-        /// <returns>true if need more figures to make analise</returns>
         public virtual void UpdateState(Figure f)
         {
             state.Add(f);
         }
 
-        public virtual bool NeedsMoreData()
+        /// <summary>
+        /// Throws reward if goal archived
+        /// </summary>
+        /// <returns>true if need more figures to make analise, false if analysing one</returns>
+        public virtual bool DoesItNeedMoreData()
         {
             if (state.Count == goal.Count)
             {
@@ -280,10 +280,8 @@ public class SpawnerBehaviour : MonoBehaviour
                 {
                     throw OnTaskCompleted();
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
 
             return true;
@@ -301,10 +299,9 @@ public class SpawnerBehaviour : MonoBehaviour
     {
         public override void UpdateState(Figure f)
         {
-            return;
         }
 
-        public override bool NeedsMoreData()
+        public override bool DoesItNeedMoreData()
         {
             return false;
         }
@@ -314,4 +311,6 @@ public class SpawnerBehaviour : MonoBehaviour
             throw new NotImplementedException();
         }
     }
+}
+ 
 }

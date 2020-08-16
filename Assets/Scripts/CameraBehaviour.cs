@@ -1,112 +1,121 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
+using UnityEngine.Serialization;
 
-public class CameraBehaviour : MonoBehaviour
+namespace Tetris
 {
-    private bool isCameraMoving = false;
-    private float startMoveTime;
-    private Vector3[] positionCurve;
-    private Vector3[] rotationCurve;
-    
-    public enum CameraPosition { GAME, MENU }
-
-    private CameraPosition currentPossition = CameraPosition.MENU;
-    
-    private Vector3 MenuPosition = new Vector3(5f,-30f,-10f);
-    private Vector3 GamePosition = new Vector3(0.5f,0.5f,-15f);
-    private Vector3 MenuRotation = new Vector3(-115f, 0f, 0f);
-    private Vector3 GameRotation = new Vector3(-25f, 15f, 0f);
-
-    public Func<Boolean> onMoveComplete;
-
-    
-    void Start()
+    public class CameraBehaviour : MonoBehaviour
     {
+        private bool _isCameraMoving = false;
+        private float _startMoveTime;
+        private Vector3[] _positionCurve;
+        private Vector3[] _rotationCurve;
+
+        public enum CameraPosition
+        {
+            Game,
+            Menu
+        }
+
+        [SerializeField]
+        private Transform menuTransform;
+        [SerializeField]
+        private Transform gameTransform;
         
-    }
+        [FormerlySerializedAs("MenuPosition")] [SerializeField]
+        private Vector3 menuPosition = new Vector3(5f, -30f, -10f);
 
-    
-    void Update()
-    {
-        if (isCameraMoving)
-            MoveCamera();
-        
-    }
-    
-    public void StartCameraMoving(CameraPosition moveTo, Func<Boolean> cb)
-    {
-        isCameraMoving = true;
-        startMoveTime = Time.time;;
-        switch (moveTo)
+        [FormerlySerializedAs("GamePosition")] [SerializeField]
+        private Vector3 gamePosition = new Vector3(0.5f, 0.5f, -15f);
+
+        [FormerlySerializedAs("MenuRotation")] [SerializeField]
+        private Vector3 menuRotation = new Vector3(-115f, 0f, 0f);
+
+        [FormerlySerializedAs("GameRotation")] [SerializeField]
+        private Vector3 gameRotation = new Vector3(-25f, 15f, 0f);
+
+        public Func<Boolean> onMoveComplete;
+
+        void Update()
         {
-            case CameraPosition.GAME: 
-                positionCurve = new Vector3[4];
-                positionCurve[0] = MenuPosition;
-                positionCurve[1] = new Vector3(3f,-18.0f,-20.0f);
-                positionCurve[2] = new Vector3(1,15.0f,-50.0f);
-                positionCurve[3] = GamePosition;
-                
-                rotationCurve = new Vector3[3];
-                rotationCurve[0] = MenuRotation;
-                rotationCurve[1] = new Vector3(-20f, 7f,0f);
-                rotationCurve[2] = GameRotation;
-                break;
-            case CameraPosition.MENU:
-                positionCurve = new Vector3[4];
-                positionCurve[3] = MenuPosition;
-                positionCurve[2] = new Vector3(3f,-18.0f,-20.0f);
-                positionCurve[1] = new Vector3(1,15.0f,-50.0f);
-                positionCurve[0] = GamePosition;
-                
-                rotationCurve = new Vector3[3];
-                rotationCurve[2] = MenuRotation;
-                rotationCurve[1] = new Vector3(-20f, 7f,0f);
-                rotationCurve[0] = GameRotation;
-                break;
+            if (_isCameraMoving)
+                MoveCamera();
         }
 
-        onMoveComplete = cb;
-    }
+        public void StartCameraMoving(CameraPosition moveTo, Func<Boolean> cb)
+        {
+            _isCameraMoving = true;
+            _startMoveTime = Time.time;
+            ;
+            switch (moveTo)
+            {
+                case CameraPosition.Game:
+                    _positionCurve = new Vector3[4];
+                    _positionCurve[0] = menuPosition;
+                    _positionCurve[1] = new Vector3(3f, -18.0f, -20.0f);
+                    _positionCurve[2] = new Vector3(1, 15.0f, -50.0f);
+                    _positionCurve[3] = gamePosition;
 
-    private void MoveCamera()
-    {
-        float t = (Time.time - startMoveTime);
-        
-        transform.position = CalculateBezie(t, positionCurve);
-        transform.rotation = Quaternion.Euler(CalculateBezie(t, rotationCurve));
-        
-        if (t > 1.0f)
-        {
-            isCameraMoving = false;
-            transform.position = positionCurve[positionCurve.Length - 1];
-            transform.rotation = Quaternion.Euler(rotationCurve[rotationCurve.Length - 1]);
-            
-            onMoveComplete?.Invoke();
-            
-            return;
-        }
-    }
+                    _rotationCurve = new Vector3[3];
+                    _rotationCurve[0] = menuRotation;
+                    _rotationCurve[1] = new Vector3(-20f, 7f, 0f);
+                    _rotationCurve[2] = gameRotation;
+                    break;
+                case CameraPosition.Menu:
+                    _positionCurve = new Vector3[4];
+                    _positionCurve[3] = menuPosition;
+                    _positionCurve[2] = new Vector3(3f, -18.0f, -20.0f);
+                    _positionCurve[1] = new Vector3(1, 15.0f, -50.0f);
+                    _positionCurve[0] = gamePosition;
 
-    private Vector3 CalculateBezie(float t, Vector3[] p)
-    {
-        if (p.Length == 0)
-        {
-            return Vector3.zero;
-        }
-        if (p.Length == 1)
-        {
-            return p[0];
-        }
-        Vector3[] np = new Vector3[p.Length-1];
-        for (int i = 0; i < np.Length; i++)
-        {
-            Vector3 v = p[i+1] - p[i];
-            np[i] = p[i]+(v * t);
+                    _rotationCurve = new Vector3[3];
+                    _rotationCurve[2] = menuRotation;
+                    _rotationCurve[1] = new Vector3(-20f, 7f, 0f);
+                    _rotationCurve[0] = gameRotation;
+                    break;
+            }
+
+            onMoveComplete = cb;
         }
 
-        return CalculateBezie(t, np);
+        private void MoveCamera()
+        {
+            float t = (Time.time - _startMoveTime);
+
+            transform.position = CalculateBezie(t, _positionCurve);
+            transform.rotation = Quaternion.Euler(CalculateBezie(t, _rotationCurve));
+
+            if (t > 1.0f)
+            {
+                _isCameraMoving = false;
+                transform.position = _positionCurve[_positionCurve.Length - 1];
+                transform.rotation = Quaternion.Euler(_rotationCurve[_rotationCurve.Length - 1]);
+
+                onMoveComplete?.Invoke();
+                return;
+            }
+        }
+
+        private Vector3 CalculateBezie(float t, Vector3[] p)
+        {
+            if (p.Length == 0)
+            {
+                return Vector3.zero;
+            }
+
+            if (p.Length == 1)
+            {
+                return p[0];
+            }
+
+            Vector3[] np = new Vector3[p.Length - 1];
+            for (int i = 0; i < np.Length; i++)
+            {
+                Vector3 v = p[i + 1] - p[i];
+                np[i] = p[i] + (v * t);
+            }
+
+            return CalculateBezie(t, np);
+        }
     }
 }

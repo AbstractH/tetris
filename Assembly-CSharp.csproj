@@ -53,6 +53,7 @@
      <Compile Include="Assets\Scripts\Cell.cs" />
      <Compile Include="Assets\Scripts\Figure.cs" />
      <Compile Include="Assets\Scripts\GameFieldEditor.cs" />
+     <Compile Include="Assets\Scripts\TestScripts\ParticleTest.cs" />
      <Compile Include="Assets\Scripts\CameraBehaviour.cs" />
      <Compile Include="Assets\Scripts\GameFieldBehaviour.cs" />
      <Compile Include="Assets\Scripts\LivesBehaviour.cs" />
@@ -62,9 +63,8 @@
      <Compile Include="Assets\Scripts\CubicTextMesh.cs" />
      <Compile Include="Assets\Scripts\LevelBehaviour.cs" />
      <Compile Include="Assets\Scripts\ScoreBehaviour.cs" />
-     <Compile Include="Assets\Scripts\SpawnerBehaviour.cs" />
      <Compile Include="Assets\Scripts\CellBehaviour.cs" />
-     <Compile Include="Assets\Scripts\TestScripts\ParticleTest.cs" />
+     <Compile Include="Assets\Scripts\SpawnerBehaviour.cs" />
      <None Include="Assets\Fonts\disposabledroid-bb\fontinfo.txt" />
  <Reference Include="UnityEditor.TestRunner">
  <HintPath>/home/me/Unity/projects/Tetris/Library/ScriptAssemblies/UnityEditor.TestRunner.dll</HintPath>

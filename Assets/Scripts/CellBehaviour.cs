@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.Serialization;
 using Random = System.Random;
 
-public class CellBehaviour : MonoBehaviour
+namespace Tetris
 {
-    private ParticleSystem particles;
-    private Vector3 position;
-    private Quaternion rotation;
-    private MeshRenderer renderer;
-    public Action OnExplosionFinished;
+    public class CellBehaviour : MonoBehaviour
+{
+    private ParticleSystem _particles;
+    private Vector3 _position;
+    private Quaternion _rotation;
+    private MeshRenderer _renderer;
+    public event Action OnExplosionFinished = delegate {  };
     public void Explode()
     {
         StopAllCoroutines();
@@ -60,7 +61,7 @@ public class CellBehaviour : MonoBehaviour
     {
         int range = 60;
         Vector3 OC = transform.position;
-        Vector3 OP = position;
+        Vector3 OP = _position;
         Vector3 CP = OP - OC;
         Vector2 PD = RotateVector(new Vector2(CP.x,CP.y), new Random().Next(-range,range));
         Vector3 CD = CP + new Vector3(PD.x,PD.y,OP.z).normalized * distance;
@@ -103,29 +104,33 @@ public class CellBehaviour : MonoBehaviour
         }
         StopCoroutine("Vibration");
         StopCoroutine("ChaoticRotation");
-        transform.position = position;
-        transform.rotation = rotation;
-        transform.localScale = new Vector3(1f,1f,1f);
-        renderer.enabled = false;
-        particles.Play();
+        Transform t = transform;
+        t.position = _position;
+        t.rotation = _rotation;
+        t.localScale = new Vector3(1f,1f,1f);
+        _renderer.enabled = false;
+        _particles.Play();
         yield return new WaitForSeconds(3f);
-        renderer.enabled = true;
+        _renderer.enabled = true;
     }
 
     private void Awake()
     {
-        particles = GetComponent<ParticleSystem>();
-        renderer = GetComponent<MeshRenderer>();
+        _particles = GetComponent<ParticleSystem>();
+        _renderer = GetComponent<MeshRenderer>();
     }
 
     void Start()
     {
-        position = transform.position;
-        rotation = transform.rotation;
+        Transform t = transform;
+        _position = t.position;
+        _rotation = t.rotation;
     }
 
     void Update()
     {
         
     }
+}
+
 }

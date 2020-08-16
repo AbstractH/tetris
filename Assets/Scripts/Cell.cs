@@ -1,42 +1,44 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class Cell
+namespace Tetris
 {
-    private Vector2 position ;
-    private bool isFilled;
-
-    public Vector2 Position
+    public class Cell
     {
-        get { return position; }
-        set { position = value; }
+        private Vector2 _position ;
+        private bool _isFilled;
+
+        public Vector2 Position
+        {
+            get { return _position; }
+            set { _position = value; }
+        }
+
+        public bool IsFilled
+        {
+            get { return _isFilled; }
+            set { _isFilled = value; }
+        }
+
+        public Cell(Vector2 position)
+        {
+            _position = position;
+            _isFilled = false;
+        }
+
+        public void Fill()
+        {
+            _isFilled = true;
+        }
+
+        public void Clear()
+        {
+            _isFilled = false;
+        }
+
+        public bool IsOnSamePosition(Cell cell)
+        {
+            return this._position.Equals(cell._position);
+        } 
     }
 
-    public bool IsFilled
-    {
-        get { return isFilled; }
-        set { isFilled = value; }
-    }
-
-    public Cell(Vector2 position)
-    {
-        this.position = position;
-        this.isFilled = false;
-    }
-
-    public void Fill()
-    {
-        isFilled = true;
-    }
-
-    public void Clear()
-    {
-        isFilled = false;
-    }
-
-    public bool IsOnSamePosition(Cell cell)
-    {
-        return this.position.Equals(cell.position);
-    } 
 }
