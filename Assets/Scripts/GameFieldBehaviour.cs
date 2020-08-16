@@ -22,6 +22,7 @@ public class GameFieldBehaviour : MonoBehaviour
     public Material figureMaterial;
     private Cell[,] cells;
     private Dictionary<Cell, Renderer> screenCells;
+    private Dictionary<Cell, ParticleSystem> particles;
     private Figure current;
     private bool isGameStarted;
     private CubicTextMesh gg;
@@ -284,6 +285,11 @@ public class GameFieldBehaviour : MonoBehaviour
 
             if (lineIsFilled)
             {
+                for (int j = 0; j < width; j++)
+                {
+                    ParticleSystem p = particles[cells[i, j]];
+                    p.Play();
+                }
                 for (int h = i; h < height - 1; h++)
                 for (int j = 0; j < width; j++)
                     cells[h, j].IsFilled = cells[h + 1, j].IsFilled;
@@ -332,6 +338,7 @@ public class GameFieldBehaviour : MonoBehaviour
     {
         cells = new Cell[height,width];
         screenCells = new Dictionary<Cell, Renderer>();
+        particles = new Dictionary<Cell, ParticleSystem>();
         
         for (int i = 0; i < height; i++)
         {
@@ -343,8 +350,10 @@ public class GameFieldBehaviour : MonoBehaviour
                     new Vector3(j, i, 0), 
                     Quaternion.identity);
                 Renderer cellRenderer = screenCell.GetComponent<Renderer>();
+                ParticleSystem cellParticle = screenCell.GetComponent<ParticleSystem>();
                 screenCell.transform.parent = transform;
                 screenCells.Add(cells[i,j],cellRenderer);
+                particles.Add(cells[i,j],cellParticle);
             }
         }
         

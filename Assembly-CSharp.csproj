@@ -63,7 +63,15 @@
      <Compile Include="Assets\Scripts\LevelBehaviour.cs" />
      <Compile Include="Assets\Scripts\ScoreBehaviour.cs" />
      <Compile Include="Assets\Scripts\SpawnerBehaviour.cs" />
+     <Compile Include="Assets\Scripts\CellBehaviour.cs" />
+     <Compile Include="Assets\Scripts\TestScripts\ParticleTest.cs" />
      <None Include="Assets\Fonts\disposabledroid-bb\fontinfo.txt" />
+ <Reference Include="UnityEditor.TestRunner">
+ <HintPath>/home/me/Unity/projects/Tetris/Library/ScriptAssemblies/UnityEditor.TestRunner.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEngine.TestRunner">
+ <HintPath>/home/me/Unity/projects/Tetris/Library/ScriptAssemblies/UnityEngine.TestRunner.dll</HintPath>
+ </Reference>
  <Reference Include="Unity.Timeline.Editor">
  <HintPath>/home/me/Unity/projects/Tetris/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
  </Reference>
@@ -270,6 +278,9 @@
  </Reference>
  <Reference Include="UnityEditor">
  <HintPath>/home/me/Unity/UnityEditor/2020.1.0f1/Editor/Data/Managed/UnityEditor.dll</HintPath>
+ </Reference>
+ <Reference Include="nunit.framework">
+ <HintPath>/home/me/Unity/projects/Tetris/Library/PackageCache/com.unity.ext.nunit@1.0.0/net35/unity-custom/nunit.framework.dll</HintPath>
  </Reference>
  <Reference Include="netstandard">
  <HintPath>/home/me/Unity/UnityEditor/2020.1.0f1/Editor/Data/NetStandard/ref/2.0.0/netstandard.dll</HintPath>
