@@ -18,7 +18,7 @@ namespace Tetris
         {
             int baseScore = 2;
             int score = (int)Math.Pow(baseScore,comboBehaviour.Combo);
-            this._score+=score;
+            _score+=score;
             comboBehaviour.AddCombo();
             _mesh.Text = this._score.ToString();
         }

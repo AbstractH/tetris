@@ -16,12 +16,12 @@ namespace Tetris
     public void Explode()
     {
         StopAllCoroutines();
-        StartCoroutine("Explosion");
+        StartCoroutine(nameof(Explosion));
     }
 
     IEnumerator Vibration()
     {
-        StartCoroutine("ChaoticRotation");
+        StartCoroutine(nameof(ChaoticRotation));
         int frames = 3;
         float distance = new Vector3(1f,1f,1f).magnitude - transform.localScale.magnitude;
         distance *= distance;
@@ -31,8 +31,8 @@ namespace Tetris
             transform.position += d / frames;
             yield return new WaitForEndOfFrame();
         }
-        StopCoroutine("ChaoticRotation");
-        StartCoroutine("Vibration");
+        StopCoroutine(nameof(ChaoticRotation));
+        StartCoroutine(nameof(Vibration));
     }
 
     private void MoveToRandomPositionInRange(float d)
@@ -91,7 +91,7 @@ namespace Tetris
     IEnumerator Explosion()
     {
         MoveToRandomPositionInRange(0.1f);
-        StartCoroutine("Vibration");
+        StartCoroutine(nameof(Vibration));
         while (transform.localScale.magnitude > new Vector3(1f,1f,1f).magnitude*0.8f)
         {
             transform.localScale *= 0.99f;
@@ -102,8 +102,8 @@ namespace Tetris
             transform.localScale *= 1.08f;
             yield return new WaitForEndOfFrame();
         }
-        StopCoroutine("Vibration");
-        StopCoroutine("ChaoticRotation");
+        StopCoroutine(nameof(Vibration));
+        StopCoroutine(nameof(ChaoticRotation));
         Transform t = transform;
         t.position = _position;
         t.rotation = _rotation;
@@ -112,6 +112,7 @@ namespace Tetris
         _particles.Play();
         yield return new WaitForSeconds(3f);
         _renderer.enabled = true;
+        OnExplosionFinished();
     }
 
     private void Awake()

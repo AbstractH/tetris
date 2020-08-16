@@ -17,22 +17,11 @@ namespace Tetris
             Menu
         }
 
-        [SerializeField]
-        private Transform menuTransform;
-        [SerializeField]
-        private Transform gameTransform;
-        
-        [FormerlySerializedAs("MenuPosition")] [SerializeField]
-        private Vector3 menuPosition = new Vector3(5f, -30f, -10f);
-
-        [FormerlySerializedAs("GamePosition")] [SerializeField]
-        private Vector3 gamePosition = new Vector3(0.5f, 0.5f, -15f);
-
-        [FormerlySerializedAs("MenuRotation")] [SerializeField]
-        private Vector3 menuRotation = new Vector3(-115f, 0f, 0f);
-
-        [FormerlySerializedAs("GameRotation")] [SerializeField]
-        private Vector3 gameRotation = new Vector3(-25f, 15f, 0f);
+        //todo: make it serializeable
+        private Vector3 _menuPosition = new Vector3(5f, -30f, -10f);
+        private Vector3 _gamePosition = new Vector3(0.5f, 0.5f, -15f);
+        private Vector3 _menuRotation = new Vector3(-115f, 0f, 0f);
+        private Vector3 _gameRotation = new Vector3(-25f, 15f, 0f);
 
         public Func<Boolean> onMoveComplete;
 
@@ -51,27 +40,27 @@ namespace Tetris
             {
                 case CameraPosition.Game:
                     _positionCurve = new Vector3[4];
-                    _positionCurve[0] = menuPosition;
+                    _positionCurve[0] = _menuPosition;
                     _positionCurve[1] = new Vector3(3f, -18.0f, -20.0f);
                     _positionCurve[2] = new Vector3(1, 15.0f, -50.0f);
-                    _positionCurve[3] = gamePosition;
+                    _positionCurve[3] = _gamePosition;
 
                     _rotationCurve = new Vector3[3];
-                    _rotationCurve[0] = menuRotation;
+                    _rotationCurve[0] = _menuRotation;
                     _rotationCurve[1] = new Vector3(-20f, 7f, 0f);
-                    _rotationCurve[2] = gameRotation;
+                    _rotationCurve[2] = _gameRotation;
                     break;
                 case CameraPosition.Menu:
                     _positionCurve = new Vector3[4];
-                    _positionCurve[3] = menuPosition;
+                    _positionCurve[3] = _menuPosition;
                     _positionCurve[2] = new Vector3(3f, -18.0f, -20.0f);
                     _positionCurve[1] = new Vector3(1, 15.0f, -50.0f);
-                    _positionCurve[0] = gamePosition;
+                    _positionCurve[0] = _gamePosition;
 
                     _rotationCurve = new Vector3[3];
-                    _rotationCurve[2] = menuRotation;
+                    _rotationCurve[2] = _menuRotation;
                     _rotationCurve[1] = new Vector3(-20f, 7f, 0f);
-                    _rotationCurve[0] = gameRotation;
+                    _rotationCurve[0] = _gameRotation;
                     break;
             }
 

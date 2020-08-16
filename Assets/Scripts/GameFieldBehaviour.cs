@@ -29,10 +29,9 @@ namespace Tetris
     public Material figureMaterial;
     private Cell[,] _cells;
     private Dictionary<Cell, Renderer> _screenCells;
-    private Dictionary<Cell, ParticleSystem> _particles;
     private Figure _current;
     private bool _isGameStarted;
-    private CubicTextMesh _gg;
+    private CubicTextMesh _gameOverText;
     
     public ScoreBehaviour score;
     public LevelBehaviour level;
@@ -49,7 +48,7 @@ namespace Tetris
 
     private void Awake()
     {
-        this._gg = GetComponentInChildren<CubicTextMesh>();
+        _gameOverText = GetComponentInChildren<CubicTextMesh>();
     }
 
     void Start()
@@ -158,7 +157,7 @@ namespace Tetris
     {
         StopCoroutine(nameof(Game));
         _isGameStarted = false;
-        this._gg.Text = "C";
+        this._gameOverText.Text = "C";
         yield return new WaitForSeconds(2f);
         OnGameOver?.Invoke();
         yield return new WaitForSeconds(2f);
@@ -292,11 +291,6 @@ namespace Tetris
 
             if (lineIsFilled)
             {
-                for (int j = 0; j < width; j++)
-                {
-                    ParticleSystem p = _particles[_cells[i, j]];
-                    p.Play();
-                }
                 for (int h = i; h < height - 1; h++)
                 for (int j = 0; j < width; j++)
                     _cells[h, j].IsFilled = _cells[h + 1, j].IsFilled;
@@ -345,7 +339,6 @@ namespace Tetris
     {
         _cells = new Cell[height,width];
         _screenCells = new Dictionary<Cell, Renderer>();
-        _particles = new Dictionary<Cell, ParticleSystem>();
         
         for (int i = 0; i < height; i++)
         {
@@ -360,7 +353,6 @@ namespace Tetris
                 ParticleSystem cellParticle = screenCell.GetComponent<ParticleSystem>();
                 screenCell.transform.parent = transform;
                 _screenCells.Add(_cells[i,j],cellRenderer);
-                _particles.Add(_cells[i,j],cellParticle);
             }
         }
         
@@ -369,7 +361,7 @@ namespace Tetris
     private void PrepareForNewGame()
     {
         StopAllCoroutines();
-        _gg.Text = "";
+        _gameOverText.Text = "";
         foreach (Cell c in _cells)
             c.Clear();
         
